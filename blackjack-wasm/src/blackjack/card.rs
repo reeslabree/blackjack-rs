@@ -1,5 +1,3 @@
-use std::fmt;
-
 use crate::constants::{Suit, Value};
 
 #[derive(Eq, Hash, Debug)]
