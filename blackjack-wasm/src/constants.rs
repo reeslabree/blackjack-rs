@@ -1,4 +1,4 @@
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
 pub(crate) enum Suit {
     Hearts,
     Diamonds,
@@ -6,8 +6,8 @@ pub(crate) enum Suit {
     Spades,
 }
 
+#[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
 pub(crate) enum Value {
-    One,
     Two,
     Three,
     Four,
@@ -25,7 +25,6 @@ pub(crate) enum Value {
 
 pub(crate) fn get_value(value: Value) -> (u16, Option<u16>) {
     let val = match value {
-        Value::One => 1,
         Value::Two => 2,
         Value::Three => 3,
         Value::Four => 4,
