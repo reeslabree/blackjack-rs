@@ -24,7 +24,7 @@ trait Hand {
     fn new() -> Self;
     fn show_hand(&self) -> Result<Vec<Card>, Box<dyn Error>>;
     fn add_card(&mut self, card: Card);
-    fn score_hand(&self) -> Result<i64, Box<dyn Error>>;
+    fn score_hand(&self) -> Result<Vec<i64>, Box<dyn Error>>;
 }
 
 impl Hand for DealerHand {
@@ -47,21 +47,38 @@ impl Hand for DealerHand {
         self.cards.push(card);
     }
 
-    fn score_hand(&self) -> Result<i64, Box<dyn Error>> {
+    fn score_hand(&self) -> Result<Vec<i64>, Box<dyn Error>> {
         if self.cards.len() <= 0 {
             return Err("Cannot score hand that holds zero cards.".into())
         }
         
-        let mut sum = 0;
+        let mut scores = vec![0];
         for card in &self.cards {
             let score = card.score();
+            let num_scores = scores.len();
+
             match score.1 {
-                Some(t) => todo!("Implement a way to score with aces"),
-                None => sum += score.0,
+                Some(t) => {
+                    let scores_clone = scores.clone();
+                    scores.extend(scores_clone);
+                    for i in 0..(2 * num_scores) {
+                        match i % 2 {
+                            0 => scores[i] += score.0,
+                            _ => scores[i] += t,
+                        }
+                    }
+                },
+                None => {
+                    for i in 0..num_scores {
+                        scores[i] += score.0
+                    }
+                },
             }
+
+            
         }
 
-        Ok(sum)
+        Ok(scores)
     }
 }
 
@@ -85,20 +102,37 @@ impl Hand for PlayerHand {
         self.cards.push(card);
     }
 
-    fn score_hand(&self) -> Result<i64, Box<dyn Error>> {
+    fn score_hand(&self) -> Result<Vec<i64>, Box<dyn Error>> {
         if self.cards.len() <= 0 {
             return Err("Cannot score hand that holds zero cards.".into())
         }
         
-        let mut sum = 0;
+        let mut scores = vec![0];
         for card in &self.cards {
             let score = card.score();
+            let num_scores = scores.len();
+
             match score.1 {
-                Some(t) => todo!("implement a way to score with aces"),
-                None => sum += score.0,
+                Some(t) => {
+                    let scores_clone = scores.clone();
+                    scores.extend(scores_clone);
+                    for i in 0..(2 * num_scores) {
+                        match i % 2 {
+                            0 => scores[i] += score.0,
+                            _ => scores[i] += t,
+                        }
+                    }
+                },
+                None => {
+                    for i in 0..num_scores {
+                        scores[i] += score.0
+                    }
+                },
             }
+
+            
         }
 
-        Ok(sum)
+        Ok(scores)
     }
 }

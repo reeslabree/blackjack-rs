@@ -24,7 +24,7 @@ impl Card {
             Value::Seven => 7,
             Value::Eight => 8,
             Value::Nine => 9,
-            Value::Ace => return (10, Some(1)),
+            Value::Ace => return (11, Some(1)),
             _ => 10,
         };
         (value, None)
