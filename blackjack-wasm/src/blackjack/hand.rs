@@ -2,6 +2,7 @@ use std::error::Error;
 
 use crate::blackjack::Card;
 
+#[derive(Clone)]
 pub(in crate::blackjack) struct DealerHand {
     cards: Vec<Card>
 }
@@ -16,11 +17,12 @@ impl DealerHand {
     }
 }
 
+#[derive(Clone)]
 pub(in crate::blackjack) struct PlayerHand {
     cards: Vec<Card>
 }
 
-trait Hand {
+pub(in crate::blackjack) trait Hand {
     fn new() -> Self;
     fn show_hand(&self) -> Result<Vec<Card>, Box<dyn Error>>;
     fn add_card(&mut self, card: Card);

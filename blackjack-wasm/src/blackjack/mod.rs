@@ -6,9 +6,14 @@ mod player;
 mod shoe;
 mod hand;
 
-use crate::blackjack::card::Card;
-use crate::blackjack::player::Player;
-use crate::blackjack::shoe::Shoe;
+use self::card::Card;
+use self::player::Player;
+use self::shoe::Shoe;
+use self::hand::{DealerHand, PlayerHand};
+use self::hand::Hand;
+
+use crate::constants::GameState;
+
 
 const NUM_DECKS: u8 = 7;
 
@@ -16,19 +21,20 @@ const NUM_DECKS: u8 = 7;
 pub struct Blackjack {
     pub player: Player,
     shoe: Shoe,
-    dealer_cards: Vec<Card>,
-    player_cards: Vec<Card>,
+    dealer_cards: DealerHand,
+    player_cards: PlayerHand,
     player_bet: i64,
-    active_hand: bool,
+    game_state: u8
 }
+
 
 impl Blackjack {
     pub fn init() -> Self {
         let player = Player::new();
         let shoe = Shoe::new(NUM_DECKS);
-        let dealer_cards: Vec<Card> = vec![];
-        let player_cards: Vec<Card> = vec![];
-        let active_hand = false;
+        let dealer_cards = DealerHand::new();
+        let player_cards = PlayerHand::new();
+        let game_state = GameState::INITIALIZED;
         let player_bet = 0;
 
         Self {
@@ -37,7 +43,7 @@ impl Blackjack {
             dealer_cards,
             player_cards,
             player_bet,
-            active_hand,
+            game_state,
         }
     }
 
@@ -45,13 +51,68 @@ impl Blackjack {
         if bet <= 0 {
             return Err("Bet must be greater than 0.".into());
         }
-        if self.active_hand {
+        if self.game_state != GameState::INITIALIZED {
             return Err("Cannot start hand while hand is currently active.".into());
         }
 
-        // lock in the player bet
         self.player_bet = bet;
+
+        // deal cards to player and dealer, alternating between player and dealer
+        for i in 0..4 {
+            let card = self.shoe.draw_card()?;
+            match i % 2 {
+                0 => self.player_cards.add_card(card),
+                _ => self.dealer_cards.add_card(card),
+            }
+        }
+
+        self.game_state = GameState::PLAYER_TURN;
 
         Ok(())
     }
+
+    pub fn player_hit(&mut self) -> Result<Option<i64>, Box<dyn Error>> {
+        if self.game_state != GameState::PLAYER_TURN {
+            return Err("Cannot hit when it is not the player turn.".into());
+        }
+
+        let card = self.shoe.draw_card()?;
+
+        self.player_cards.add_card(card);
+
+        let score = self.player_cards.clone().score_hand()?;
+        let best_score = get_best_score(score)?;
+
+        match best_score {
+            Some(_) => (),
+            None => self.game_state = GameState::DEALER_TURN,
+        }
+
+        Ok(best_score)
+    }
+
+    pub fn end_player_turn(&mut self) -> Result<Option<i64>, Box<dyn Error>> {
+        if self.game_state != GameState::PLAYER_TURN {
+            return Err("Cannot end players turn outside of the player's turn.".into());
+        }
+
+        self.game_state = GameState::DEALER_TURN;
+
+        let score = self.player_cards.clone().score_hand()?;
+
+        let best_score = get_best_score(score)?;
+
+        return Ok(best_score);
+    }
+}
+
+fn get_best_score(mut score: Vec<i64>) -> Result<Option<i64>, Box<dyn Error>> {
+    score.sort_by(|a, b,| { b.cmp(a) });
+
+    for s in score {
+        if s > 21 { continue };
+        return Ok(Some(s));
+    }
+
+    Ok(None)
 }
