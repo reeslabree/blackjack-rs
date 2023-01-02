@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use crate::blackjack::card::Card;
 use crate::constants::Value::*;
 use crate::constants::{Suit, Suit::*};
@@ -42,6 +44,15 @@ impl Shoe {
         cards.shuffle(&mut thread_rng());
 
         Self { cards }
+    }
+
+    pub fn draw_card(&mut self) -> Result<Card, Box<dyn Error>>{
+        let card = self.cards.pop();
+
+        match card {
+            Some(t) => Ok(t),
+            None => Err("Empty deck.".into())
+        }
     }
 }
 
