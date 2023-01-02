@@ -1,10 +1,10 @@
 use std::error::Error;
 
-use crate::blackjack::Card;
+use crate::{blackjack::Card, constants::Value};
 
 #[derive(Clone)]
 pub(in crate::blackjack) struct DealerHand {
-    cards: Vec<Card>
+    cards: Vec<Card>,
 }
 
 impl DealerHand {
@@ -19,7 +19,7 @@ impl DealerHand {
 
 #[derive(Clone)]
 pub(in crate::blackjack) struct PlayerHand {
-    cards: Vec<Card>
+    cards: Vec<Card>,
 }
 
 pub(in crate::blackjack) trait Hand {
@@ -27,13 +27,27 @@ pub(in crate::blackjack) trait Hand {
     fn show_hand(&self) -> Result<Vec<Card>, Box<dyn Error>>;
     fn add_card(&mut self, card: Card);
     fn score_hand(&self) -> Result<Vec<i64>, Box<dyn Error>>;
+    fn is_blackjack(&self) -> bool;
 }
 
 impl Hand for DealerHand {
     fn new() -> Self {
         let cards: Vec<Card> = vec![];
-        Self {
-            cards
+        Self { cards }
+    }
+
+    fn is_blackjack(&self) -> bool {
+        match self.cards.len() {
+            2 => {
+                if self.cards[0].value == Value::Jack && self.cards[1].value == Value::Ace
+                    || self.cards[0].value == Value::Ace && self.cards[1].value == Value::Ace
+                {
+                    true
+                } else {
+                    false
+                }
+            }
+            _ => false,
         }
     }
 
@@ -41,7 +55,7 @@ impl Hand for DealerHand {
         let top_card = self.cards.get(0);
         match top_card {
             Some(t) => Ok(vec![*t]),
-            None => Err("Dealer hand contains no cards.".into())
+            None => Err("Dealer hand contains no cards.".into()),
         }
     }
 
@@ -51,9 +65,9 @@ impl Hand for DealerHand {
 
     fn score_hand(&self) -> Result<Vec<i64>, Box<dyn Error>> {
         if self.cards.len() <= 0 {
-            return Err("Cannot score hand that holds zero cards.".into())
+            return Err("Cannot score hand that holds zero cards.".into());
         }
-        
+
         let mut scores = vec![0];
         for card in &self.cards {
             let score = card.score();
@@ -69,15 +83,13 @@ impl Hand for DealerHand {
                             _ => scores[i] += t,
                         }
                     }
-                },
+                }
                 None => {
                     for i in 0..num_scores {
                         scores[i] += score.0
                     }
-                },
+                }
             }
-
-            
         }
 
         Ok(scores)
@@ -87,8 +99,21 @@ impl Hand for DealerHand {
 impl Hand for PlayerHand {
     fn new() -> Self {
         let cards: Vec<Card> = vec![];
-        Self {
-            cards
+        Self { cards }
+    }
+
+    fn is_blackjack(&self) -> bool {
+        match self.cards.len() {
+            2 => {
+                if self.cards[0].value == Value::Jack && self.cards[1].value == Value::Ace
+                    || self.cards[0].value == Value::Ace && self.cards[1].value == Value::Ace
+                {
+                    true
+                } else {
+                    false
+                }
+            }
+            _ => false,
         }
     }
 
@@ -106,9 +131,9 @@ impl Hand for PlayerHand {
 
     fn score_hand(&self) -> Result<Vec<i64>, Box<dyn Error>> {
         if self.cards.len() <= 0 {
-            return Err("Cannot score hand that holds zero cards.".into())
+            return Err("Cannot score hand that holds zero cards.".into());
         }
-        
+
         let mut scores = vec![0];
         for card in &self.cards {
             let score = card.score();
@@ -124,15 +149,13 @@ impl Hand for PlayerHand {
                             _ => scores[i] += t,
                         }
                     }
-                },
+                }
                 None => {
                     for i in 0..num_scores {
                         scores[i] += score.0
                     }
-                },
+                }
             }
-
-            
         }
 
         Ok(scores)

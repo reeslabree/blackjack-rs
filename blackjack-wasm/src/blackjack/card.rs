@@ -3,7 +3,7 @@ use crate::constants::{Suit, Value};
 #[derive(Eq, Hash, Debug, Clone, Copy)]
 pub(in crate::blackjack) struct Card {
     suit: Suit,
-    value: Value
+    pub(in crate::blackjack) value: Value
 }
 
 impl Card {

@@ -26,8 +26,8 @@ pub(crate) enum Value {
 #[non_exhaustive]
 pub(crate) struct GameState;
 impl GameState {
-    pub const INITIALIZED: u8 = 00;
-    pub const HAND_STARTED: u8 = 01;
-    pub const PLAYER_TURN: u8 = 02;
-    pub const DEALER_TURN: u8 = 03;
+    pub const HAND_STARTED: u8 = 00;
+    pub const PLAYER_TURN: u8 = 01;
+    pub const DEALER_TURN: u8 = 02;
+    pub const END_HAND: u8 = 03;
 }

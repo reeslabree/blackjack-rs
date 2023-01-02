@@ -34,7 +34,7 @@ impl Blackjack {
         let shoe = Shoe::new(NUM_DECKS);
         let dealer_cards = DealerHand::new();
         let player_cards = PlayerHand::new();
-        let game_state = GameState::INITIALIZED;
+        let game_state = GameState::HAND_STARTED;
         let player_bet = 0;
 
         Self {
@@ -51,7 +51,7 @@ impl Blackjack {
         if bet <= 0 {
             return Err("Bet must be greater than 0.".into());
         }
-        if self.game_state != GameState::INITIALIZED {
+        if self.game_state != GameState::HAND_STARTED {
             return Err("Cannot start hand while hand is currently active.".into());
         }
 
@@ -104,6 +104,12 @@ impl Blackjack {
 
         return Ok(best_score);
     }
+
+    pub fn do_dealer_turn(&mut self) -> Result<Option<i64>, Box<dyn Error>> {
+
+
+        Ok(None)
+    }
 }
 
 fn get_best_score(mut score: Vec<i64>) -> Result<Option<i64>, Box<dyn Error>> {
@@ -115,4 +121,24 @@ fn get_best_score(mut score: Vec<i64>) -> Result<Option<i64>, Box<dyn Error>> {
     }
 
     Ok(None)
+}
+
+fn should_dealer_hit(score: Vec<i64>) -> Result<bool, Box<dyn Error>> {
+    let min_score = score.iter().min();
+
+    match min_score {
+        Some(t) => {
+            if *t < 17 { return Ok(true) }
+            else { return Ok(false) }
+        },
+        None => return Err("Could not derive minimum score for dealer.".into()),
+    }
+}
+
+fn is_blackjack<T>(hand: T) -> Result<bool, Box<dyn Error>> 
+where
+    T: Hand
+{
+
+    Ok(true)
 }
