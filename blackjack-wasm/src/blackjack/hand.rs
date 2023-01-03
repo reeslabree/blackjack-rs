@@ -1,6 +1,7 @@
 use std::error::Error;
 
-use crate::{blackjack::Card, constants::Value};
+use crate::blackjack::Card;
+use crate::constants::Value;
 
 #[derive(Clone)]
 pub(in crate::blackjack) struct DealerHand {

@@ -55,6 +55,7 @@ impl Blackjack {
             return Err("Cannot start hand while hand is currently active.".into());
         }
 
+        self.player.debit(bet)?;
         self.player_bet = bet;
 
         // deal cards to player and dealer, alternating between player and dealer
@@ -106,9 +107,54 @@ impl Blackjack {
     }
 
     pub fn do_dealer_turn(&mut self) -> Result<Option<i64>, Box<dyn Error>> {
+        if self.game_state != GameState::DEALER_TURN {
+            return Err("Cannot begin dealer turn outside of dealer's turn.".into());
+        }
 
+        loop {
+            let score = self.dealer_cards.score_hand()?;
+            match should_dealer_hit(score)? {
+                true => {
+                    let card = self.shoe.draw_card()?;
+                    self.dealer_cards.add_card(card);
+                },
+                false => break,
+            }
+        }
 
-        Ok(None)
+        let dealer_score = get_best_score(self.dealer_cards.score_hand()?)?;
+
+        self.game_state = GameState::END_HAND;
+
+        Ok(dealer_score)
+    }
+
+    pub fn end_hand(&mut self) -> Result<(), Box<dyn Error>> {
+        let player_score = get_best_score(self.player_cards.score_hand()?)?;
+        let dealer_score = get_best_score(self.dealer_cards.score_hand()?)?;
+
+        match player_score {
+            Some(t) => match dealer_score {
+                Some(v) => if t > v {
+                    self.player.credit(self.player_bet)?;
+                },
+                None => (),
+            },
+            None => ()
+        }
+
+        self.reset_hand()?;
+
+        Ok(())
+    }
+
+    fn reset_hand(&mut self) -> Result<(), Box<dyn Error>> {
+        self.dealer_cards = DealerHand::new();
+        self.player_cards = PlayerHand::new();
+        self.player_bet = 0;
+        self.game_state = GameState::HAND_STARTED;
+
+        Ok(())
     }
 }
 
@@ -133,12 +179,4 @@ fn should_dealer_hit(score: Vec<i64>) -> Result<bool, Box<dyn Error>> {
         },
         None => return Err("Could not derive minimum score for dealer.".into()),
     }
-}
-
-fn is_blackjack<T>(hand: T) -> Result<bool, Box<dyn Error>> 
-where
-    T: Hand
-{
-
-    Ok(true)
 }
