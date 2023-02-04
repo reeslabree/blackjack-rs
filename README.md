@@ -1,4 +1,4 @@
-# reeslabree/counter-keeper
+# reeslabree/blackjack-rs
 
 ## summary
 As a pet project for the start of 2023, I'd like to learn Rust + WASM, and Remix. Blackjack has always seemed to me to be the best way to prove your adequacy with a language, so I figured I'd start there. As of late, I've also been very interested in professional card counters on YouTube so I figured I'd merge my latest interests to create a new project.
