@@ -1,2 +1,2 @@
 [workspace]
-members = ["./blackjack-wasm"]
+members = ["./blackjack-rs"]
